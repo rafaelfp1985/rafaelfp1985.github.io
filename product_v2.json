@@ -1,0 +1,1902 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "wescale product API",
+    "description": "The wescale product API can be used to retrieve detailed information of products from shopping. The available products are determined by the\ncontent visibility of the requesting user. More accurate it depends on the content channels assigned to the user and the content sources these\nchannels contain (multi content channel management).\n\nThe API offers operations to retrieve data for a single product as well as operations to retrieve data from multiple products at once.\n\nIn addition to general information about a product further information like reference products, similar products and optimizations are avaialble.\n\n## Reference products\nSome products are bundeled with others and can only be ordered together. A notebook for example might be bundeled with a docksting station as a\nmandatory accessory. The reference products can be retrieved for every visible procuct based on its stable identifier. If necessary the type of\nthe reference products can be restricted.\n\n## Similar products\nFor many products there are alternative products available that are quite similar to the original one but might be better suited for the users's\nneeds. A switch with 8 ports from another manuafacturer might even be cheaper than a 5 port switch. In order to make this alternatives visible to\nthe user the similar products can be retrieved for every visible procuct based on its stable identifier.\n\nIn addition similar items can be retrieved for non-catalog items based on information like short and long description.\n\n## Optimizations\nSome products might be available from multiple suppliers but on different terms. One supplier might offer a better price another one a faster\ndelivery time. In order to support the users in optimizing their purchases in the best way possible available alternatives can be retrieved for\nevery visible procuct based on its stable identifier and the respective quantity.\n\nIn addition optimizations can be retrieved for non-catalog items based on information like article numbers and supplier or manufacturer name.\n",
+    "version": "v2"
+  },
+  "servers": [
+    {
+      "url": "https://api-dev.wescale.com/product/v2"
+    }
+  ],
+  "security": [
+    {
+      "OAuth2": [
+        "read",
+        "write"
+      ]
+    }
+  ],
+  "paths": {
+    "/products/{product-id}": {
+      "get": {
+        "operationId": "getProductDetails",
+        "summary": "Get the details of a product by stable identifier.",
+        "description": "Get a specific product from the collection based on the stable identifier.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Accept-Language"
+          },
+          {
+            "$ref": "#/components/parameters/Stable-Product-ID"
+          }
+        ],
+        "tags": [
+          "ProductDetails"
+        ],
+        "responses": {
+          "200": {
+            "description": "The details of the product.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "description": "The product has not been found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://opensource.zalando.com/problem/schema.yaml#/Problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products/{product-id}/reference-products": {
+      "get": {
+        "operationId": "getReferenceProducts",
+        "summary": "Get the reference products of a single product by stable identifier.",
+        "description": "Get a list of reference products for a specific product from the collection based on the stable identifier.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Accept-Language"
+          },
+          {
+            "$ref": "#/components/parameters/Stable-Product-ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Number of entries per page, also known as page size.",
+            "required": false
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Numeric offset identifying the first page entry.",
+            "required": false
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": "+name"
+            },
+            "x-extensible-enum": [
+              "+name",
+              "-name"
+            ],
+            "description": "Comma-separated list of fields to sort by. The sorting direction is indicated by prefixes '+' (ascending, default) or '-' (descending), e.g. `sort=+name`.",
+            "required": false
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-extensible-enum": [
+              "sparepart",
+              "similar",
+              "followup",
+              "mandatory",
+              "select",
+              "diff_orderunit",
+              "accessories",
+              "consists_of",
+              "others"
+            ],
+            "description": "Comma separated list of types of refrences to return.",
+            "required": false
+          }
+        ],
+        "tags": [
+          "ReferenceProducts"
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of reference products of the product.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceProducts"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "description": "The product has not been found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://opensource.zalando.com/problem/schema.yaml#/Problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products/{product-id}/similar-products": {
+      "get": {
+        "operationId": "getSimilarProducts",
+        "summary": "Get the similar products of a single product by stable identifier.",
+        "description": "Get a list of similar products for a specific product from the collection based on the stable identifier.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Accept-Language"
+          },
+          {
+            "$ref": "#/components/parameters/Stable-Product-ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "maximum": 100,
+              "minimum": 0,
+              "default": 10
+            },
+            "description": "Number of entries per page, also known as page size.",
+            "required": false
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Numeric offset identifying the first page entry.",
+            "required": false
+          }
+        ],
+        "tags": [
+          "SimilarItems"
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of similar products of the product.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimilarProducts"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "description": "The product has not been found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://opensource.zalando.com/problem/schema.yaml#/Problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products/{product-id}/optimizations": {
+      "get": {
+        "operationId": "getOptimizations",
+        "summary": "Get the optimizations of a single product by stable identifier.",
+        "description": "Get a list of optimizations for a specific product from the collection based on the stable identifier.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Accept-Language"
+          },
+          {
+            "$ref": "#/components/parameters/Stable-Product-ID"
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "default": 1
+            },
+            "description": "Quantity the optimizations should be based on.",
+            "required": false
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 10
+            },
+            "description": "Number of entries per page, also known as page size.",
+            "required": false
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Numeric offset identifying the first page entry.",
+            "required": false
+          }
+        ],
+        "tags": [
+          "Optimizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of optimizations of the product.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Optimizations"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "description": "The product has not been found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "https://opensource.zalando.com/problem/schema.yaml#/Problem"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products/bulk": {
+      "post": {
+        "operationId": "listProducts",
+        "summary": "Get the details of multiple products by stable identifier.",
+        "description": "Get a list of details for multiple products from the collection based on the stable identifier.\n\n`GET with body` Since the size of the request parameters might exceed the maximum length of the URL and to avoid parameter encoding the\noperation uses `POST` instead of `GET` even though no data is created.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Accept-Language"
+          }
+        ],
+        "requestBody": {
+          "description": "The products to get.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductsBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "tags": [
+          "ProductDetails"
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of products.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductsBulkResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "default": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products/reference-products/bulk": {
+      "post": {
+        "operationId": "listReferenceProducts",
+        "summary": "Get the reference products of multiple products by stable identifier.",
+        "description": "Get a list of reference products for multiple products from the collection based on the stable identifier.\n\n`GET with body` Since the size of the request parameters might exceed the maximum length of the URL and to avoid parameter encoding the\noperation uses `POST` instead of `GET` even though no data is created.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Accept-Language"
+          }
+        ],
+        "requestBody": {
+          "description": "The products to get reference products for.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReferenceProductsBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "tags": [
+          "ReferenceProducts"
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of reference products of the products.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferenceProductsBulkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "default": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products/similar-products/bulk": {
+      "post": {
+        "operationId": "listSimilarProducts",
+        "summary": "Get the similar products of multiple products by stable identifier.",
+        "description": "Get a list of similar products for multiple products from the collection based on the stable identifier.\n\n`GET with body` Since the size of the request parameters might exceed the maximum length of the URL and to avoid parameter encoding the\noperation uses `POST` instead of `GET` even though no data is created.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Accept-Language"
+          }
+        ],
+        "requestBody": {
+          "description": "The products to get similar products for.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SimilarProductsBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "tags": [
+          "SimilarProducts"
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of similar products of the products.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimilarProductsBulkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "default": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/products/optimizations/bulk": {
+      "post": {
+        "operationId": "listOptimizations",
+        "summary": "Get the optimizations of multiple products by stable identifier.",
+        "description": "Get a list of optimizations for multiple products from the collection based on the stable identifier.\n\n`GET with body` Since the size of the request parameters might exceed the maximum length of the URL and to avoid parameter encoding the\noperation uses `POST` instead of `GET` even though no data is created.\n",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Accept-Language"
+          }
+        ],
+        "requestBody": {
+          "description": "The products to get optimizations for.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptimizationsBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "tags": [
+          "Optimizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "The list of optimizations of the products.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptimizationsBulkResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "default": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Accept-Language": {
+        "name": "Accept-Language",
+        "in": "header",
+        "schema": {
+          "type": "string"
+        },
+        "description": "Preferred language for information retrieval.",
+        "required": true
+      },
+      "Stable-Product-ID": {
+        "name": "product-id",
+        "in": "path",
+        "schema": {
+          "type": "string"
+        },
+        "description": "The stable identifier of the product in wescale.",
+        "required": true
+      }
+    },
+    "responses": {
+      "400": {
+        "description": "The request is invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "https://opensource.zalando.com/problem/schema.yaml#/Problem"
+            },
+            "example": [
+              {
+                "title": "Bad Request",
+                "status": 400,
+                "detail": "The request is invalid."
+              }
+            ]
+          }
+        }
+      },
+      "403": {
+        "description": "The user is not authorized.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "https://opensource.zalando.com/problem/schema.yaml#/Problem"
+            },
+            "example": [
+              {
+                "title": "Forbidden",
+                "status": 403,
+                "detail": "The user is not authorized."
+              }
+            ]
+          }
+        }
+      },
+      "500": {
+        "description": "An unexpected error occured.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "https://opensource.zalando.com/problem/schema.yaml#/Problem"
+            },
+            "example": [
+              {
+                "title": "Server Error",
+                "status": 500,
+                "detail": "An unexpected error occurred."
+              }
+            ]
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Product": {
+        "type": "object",
+        "description": "Representation of a product containing all available information.",
+        "properties": {
+          "unique_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier of the product."
+          },
+          "tenant_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier of the wescale tenant."
+          },
+          "stable_id": {
+            "type": "string",
+            "description": "Stable identifier of the product (generated based on the catalog label and the supplier part number).",
+            "example": [
+              "A2FAB43CDDB0BA998553322B928A30232BC43360"
+            ]
+          },
+          "meplato_product_id": {
+            "type": "string",
+            "description": "Meplato identifier of the product."
+          },
+          "external_product_id": {
+            "type": "string",
+            "description": "External identifier of the product."
+          },
+          "catalog": {
+            "$ref": "#/components/schemas/ProductCatalog"
+          },
+          "supplier": {
+            "$ref": "#/components/schemas/ProductSupplier"
+          },
+          "merchant": {
+            "$ref": "#/components/schemas/ProductMerchant"
+          },
+          "manufacturer": {
+            "$ref": "#/components/schemas/ProductManufacturer"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name or rather short description."
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description or rather long description."
+          },
+          "keywords": {
+            "type": "array",
+            "description": "List of keywords.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "type": {
+            "type": "string",
+            "x-extensible-enum": [
+              "product",
+              "configurable_product",
+              "ebook",
+              "stocked_material",
+              "external_shop",
+              "external_shop_item"
+            ],
+            "description": "Product type."
+          },
+          "material_group": {
+            "type": "string",
+            "description": "Material group."
+          },
+          "numbers": {
+            "$ref": "#/components/schemas/ProductNumbers"
+          },
+          "contract_number": {
+            "type": "string",
+            "description": "Number of the associated contract."
+          },
+          "contract_item": {
+            "type": "string",
+            "description": "Position within the associated contract."
+          },
+          "delivery_time": {
+            "type": "number",
+            "format": "float",
+            "description": "Delivery time in days."
+          },
+          "quantities": {
+            "$ref": "#/components/schemas/ProductQuantities"
+          },
+          "order_unit": {
+            "$ref": "#/components/schemas/ProductUnit"
+          },
+          "packaging_unit": {
+            "$ref": "#/components/schemas/ProductUnit"
+          },
+          "net_prices": {
+            "$ref": "#/components/schemas/ProductPrices"
+          },
+          "gross_prices": {
+            "$ref": "#/components/schemas/ProductPrices"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code.",
+            "example": [
+              "EUR",
+              "USD"
+            ]
+          },
+          "display_prices": {
+            "$ref": "#/components/schemas/ProductDisplayPrices"
+          },
+          "is_daily_price": {
+            "type": "boolean",
+            "description": "Flag indicating if the price is daily based."
+          },
+          "tax": {
+            "$ref": "#/components/schemas/ProductTax"
+          },
+          "is_visible": {
+            "type": "boolean",
+            "description": "Flag indicating if the product is visible and can be found."
+          },
+          "is_orderable": {
+            "type": "boolean",
+            "description": "Flag indicating if the product can be ordered."
+          },
+          "is_incomplete": {
+            "type": "boolean",
+            "description": "Flag indicating if the product is incomplete."
+          },
+          "is_service": {
+            "type": "boolean",
+            "description": "Flag indicating if the product is a service item."
+          },
+          "is_managed": {
+            "type": "boolean",
+            "description": "Flag indicating if the product is managed by an external provider."
+          },
+          "managed_type": {
+            "type": "string",
+            "x-extensible-enum": [
+              "external_configuration",
+              "external_shop",
+              "external_shop_item",
+              "external_add_to_cart",
+              "external_info"
+            ],
+            "description": "Managed type of the item. Only relevant in combination with `is_managed=true`."
+          },
+          "is_configurable": {
+            "type": "boolean",
+            "description": "Flag indicating if the product must be configured."
+          },
+          "configuration_info": {
+            "$ref": "#/components/schemas/ProductConfigurationInfo"
+          },
+          "intrastat": {
+            "$ref": "#/components/schemas/ProductIntrastat"
+          },
+          "additional_attributes": {
+            "type": "array",
+            "description": "Additional product information.",
+            "items": {
+              "$ref": "#/components/schemas/ProductAdditionalAttribute"
+            }
+          },
+          "categories": {
+            "type": "array",
+            "description": "List of associated categories.",
+            "items": {
+              "$ref": "#/components/schemas/ProductCategory"
+            }
+          },
+          "features": {
+            "type": "array",
+            "description": "List of associated features.",
+            "items": {
+              "$ref": "#/components/schemas/ProductFeature"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "description": "List of attachments.",
+            "items": {
+              "$ref": "#/components/schemas/ProductAttachment"
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "description": "List of conditions.",
+            "items": {
+              "$ref": "#/components/schemas/ProductCondition"
+            }
+          },
+          "references": {
+            "type": "array",
+            "description": "List of references.",
+            "items": {
+              "$ref": "#/components/schemas/ProductReference"
+            }
+          },
+          "special_treatment_classes": {
+            "type": "array",
+            "description": "List of special treatment classes.",
+            "items": {
+              "$ref": "#/components/schemas/ProductSpecialTreatmentClass"
+            }
+          },
+          "images": {
+            "type": "array",
+            "description": "List of images extracted from the attachments.",
+            "items": {
+              "$ref": "#/components/schemas/ProductImage"
+            }
+          }
+        }
+      },
+      "ProductCatalog": {
+        "type": "object",
+        "description": "Representation of a catalog.",
+        "properties": {
+          "unique_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier of the catalog in wescale."
+          },
+          "stable_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Stable identifier of the catalog in wescale."
+          },
+          "type": {
+            "type": "string",
+            "x-extensible-enum": [
+              "corporate",
+              "meplato_basic",
+              "stockedmaterial",
+              "srm_contract",
+              "srm_material",
+              "ebook",
+              "erp_contract",
+              "erp_material"
+            ],
+            "description": "Type of the associated catalog."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the catalog."
+          },
+          "label": {
+            "type": "string",
+            "description": "Unique label of the catalog within the wescale tenant."
+          },
+          "language": {
+            "type": "string",
+            "description": "Language of the catalog."
+          },
+          "valid_from": {
+            "type": "string",
+            "format": "date",
+            "description": "Begin of the validity period."
+          },
+          "valid_until": {
+            "type": "string",
+            "format": "date",
+            "description": "End of the validity period."
+          }
+        }
+      },
+      "ProductSupplier": {
+        "type": "object",
+        "description": "Representation of a supplier.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Display code of the supplier."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the supplier."
+          }
+        }
+      },
+      "ProductMerchant": {
+        "type": "object",
+        "description": "Representation of a merchant.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier of the merchant."
+          },
+          "mpcc": {
+            "type": "string",
+            "description": "Unique Meplato Company Code of the merchant."
+          },
+          "mpsc": {
+            "type": "string",
+            "description": "Meplato Supplier Code of the merchant."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the merchant."
+          }
+        }
+      },
+      "ProductManufacturer": {
+        "type": "object",
+        "description": "Representation of a manufacturer.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Display code of the manufacturer."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the manufacturer."
+          }
+        }
+      },
+      "ProductNumbers": {
+        "type": "object",
+        "description": "Representation of product identifiers.",
+        "properties": {
+          "supplier": {
+            "type": "string",
+            "description": "Product identifier of the supplier, e.g. supplier sku or item number."
+          },
+          "manufacturer": {
+            "type": "string",
+            "description": "Product identifier of the manufacturer, e.g. manufacturers article number."
+          },
+          "buyer": {
+            "type": "string",
+            "description": "Product identifier of the purchasing organization, e.g. material item number in stock."
+          },
+          "gtin": {
+            "type": "string",
+            "description": "Global Trade Item Number."
+          },
+          "asin": {
+            "type": "string",
+            "description": "Amazon Standard Identification Number."
+          },
+          "additional": {
+            "type": "array",
+            "description": "List of additional product identifiers.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "previous": {
+            "type": "array",
+            "description": "List of identifiers this product had before.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "replaced": {
+            "type": "array",
+            "description": "List of identifiers this product replaces.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProductQuantities": {
+        "type": "object",
+        "description": "Representation of quantity information.",
+        "properties": {
+          "minimum_quantity": {
+            "type": "number",
+            "format": "float",
+            "description": "Minimum order quantity of the item, e.g. must be at least 10 packs.",
+            "default": 1
+          },
+          "maximum_quantity": {
+            "type": "number",
+            "format": "float",
+            "description": "Maximum order quantity of the item, e.g. only 1 eBook could be ordered."
+          },
+          "interval_quantity": {
+            "type": "number",
+            "format": "float",
+            "description": "Interval order quantity of the item, e.g. could be ordered in amounts of 10, 20, 30 packs and so on.",
+            "default": 1
+          },
+          "packaging_quantity": {
+            "type": "number",
+            "format": "float",
+            "description": "Packaging quantity of the item, e.g. 1 pack contains 10 pieces.",
+            "default": 1
+          },
+          "price_quantity": {
+            "type": "number",
+            "format": "float",
+            "description": "Price is specified for a certain order quantity of units, e.g. 100 means that 100 units are ordered for a price of 92.100 USD.",
+            "default": 1
+          }
+        }
+      },
+      "ProductUnit": {
+        "type": "object",
+        "description": "Representation of a unit.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Technical code.",
+            "example": [
+              "PK",
+              "HR"
+            ]
+          },
+          "abbreviation_singular": {
+            "type": "string",
+            "description": "Localized abbreviation for singular.",
+            "example": [
+              "pc"
+            ]
+          },
+          "abbreviation_plural": {
+            "type": "string",
+            "description": "Localized abbreviation for plural.",
+            "example": [
+              "pcs"
+            ]
+          },
+          "name_singular": {
+            "type": "string",
+            "description": "Localized name for singular.",
+            "example": [
+              "piece"
+            ]
+          },
+          "name_plural": {
+            "type": "string",
+            "description": "Localized name for plural.",
+            "example": [
+              "pieces"
+            ]
+          }
+        }
+      },
+      "ProductPrices": {
+        "type": "object",
+        "description": "Representation of price information.",
+        "properties": {
+          "order_price": {
+            "type": "number",
+            "format": "double",
+            "description": "Price of the item in the given currency for the specified price quantity, e.g. 92.100 USD for 100 packs. This is the orderable price."
+          },
+          "unit_price": {
+            "type": "number",
+            "format": "double",
+            "description": "Calculated price for a single order unit, e.g. 0.921 USD for 1 pack ordered at a price of 92.100 USD for 100 packs. Non-orderable price, it is just for display purposes."
+          },
+          "item_price": {
+            "type": "number",
+            "format": "double",
+            "description": "Calculated price for one single item if a packaging unit and packaging quantity is given, e.g. 0.0921 USD for each piece in 1 pack ordered at a price of 92.100 USD for 100 packs containing 10 pieces per pack. Non-orderable price, it is just for display purposes."
+          },
+          "scale_prices": {
+            "type": "array",
+            "description": "List of scale prices.",
+            "items": {
+              "$ref": "#/components/schemas/ProductScalePrice"
+            }
+          }
+        }
+      },
+      "ProductScalePrice": {
+        "type": "object",
+        "description": "Representation of a scale price.",
+        "properties": {
+          "lower_bound": {
+            "type": "number",
+            "format": "float",
+            "description": "Lower-bound quantity for which the price is applicable."
+          },
+          "price": {
+            "type": "number",
+            "format": "double",
+            "description": "Price amount."
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code."
+          }
+        }
+      },
+      "ProductDisplayPrices": {
+        "type": "object",
+        "description": "Representation of price information converted in the user's display currency.",
+        "properties": {
+          "net_prices": {
+            "$ref": "#/components/schemas/ProductPrices"
+          },
+          "gross_prices": {
+            "$ref": "#/components/schemas/ProductPrices"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code."
+          }
+        }
+      },
+      "ProductTax": {
+        "type": "object",
+        "description": "Representation of tax information.",
+        "properties": {
+          "value": {
+            "type": "number",
+            "format": "float",
+            "description": "Tax rate.",
+            "example": [
+              0.19
+            ]
+          },
+          "code": {
+            "type": "string",
+            "description": "Technical code."
+          }
+        }
+      },
+      "ProductConfigurationInfo": {
+        "type": "object",
+        "description": "Representation of configuration information.",
+        "properties": {
+          "form": {
+            "type": "string",
+            "description": "Configuration form."
+          },
+          "service": {
+            "type": "string",
+            "description": "Configuration service."
+          },
+          "key": {
+            "type": "string",
+            "description": "Configuration key."
+          }
+        }
+      },
+      "ProductIntrastat": {
+        "type": "object",
+        "description": "Representation of Intrastat information.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Identifiying code."
+          },
+          "origin_country": {
+            "type": "string",
+            "description": "Origin country."
+          },
+          "net_weight": {
+            "type": "number",
+            "format": "float",
+            "description": "Net weight."
+          },
+          "gross_weight": {
+            "type": "number",
+            "format": "float",
+            "description": "Gross weight."
+          },
+          "weight_unit": {
+            "type": "string",
+            "description": "Weight unit."
+          },
+          "transaction_type": {
+            "type": "string",
+            "description": "Transaction type."
+          },
+          "means_of_transport": {
+            "type": "string",
+            "description": "Means of transport type."
+          }
+        }
+      },
+      "ProductAdditionalAttribute": {
+        "type": "object",
+        "description": "Representation of additional information.",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "description": "Schema of the additional attribute. Arbitrary value used for namespacing attributes.",
+            "example": [
+              "custom_field"
+            ]
+          },
+          "key": {
+            "type": "string",
+            "description": "Unique identifier of the additional attribute."
+          },
+          "value": {
+            "type": "string",
+            "description": "Value of the additional attribute."
+          }
+        }
+      },
+      "ProductCategory": {
+        "type": "object",
+        "description": "Representation of a category.",
+        "properties": {
+          "schema": {
+            "type": "string",
+            "x-extensible-enum": [
+              "eclass",
+              "unspsc"
+            ],
+            "description": "Schema of the associated classification."
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the associated classification.",
+            "example": [
+              6
+            ]
+          },
+          "code": {
+            "type": "string",
+            "description": "Code of the category.",
+            "example": [
+              16030190
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Localized name of the category",
+            "example": [
+              "Handheld measuring instrument"
+            ]
+          },
+          "path": {
+            "type": "array",
+            "description": "Complete paths of the category within the hierarchy.",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "0|ECLASS-6.2",
+              "1|ECLASS-6.2|23",
+              "2|ECLASS-6.2|23|33",
+              "3|ECLASS-6.2|23|33|02",
+              "4|ECLASS-6.2|23|33|02|07"
+            ]
+          }
+        }
+      },
+      "ProductFeature": {
+        "type": "object",
+        "description": "Representation of a feature.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The feature id is a combination of kind and non-translated name,",
+            "example": [
+              "ECLASS-6.0|ABC1234"
+            ]
+          },
+          "schema": {
+            "type": "string",
+            "x-extensible-enum": [
+              "eclass",
+              "unspsc"
+            ],
+            "description": "Schema of the associated classification."
+          },
+          "version": {
+            "type": "string",
+            "description": "Version of the associated classification.",
+            "example": [
+              6
+            ]
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the feature.",
+            "example": [
+              "Weight",
+              "ABC1234"
+            ]
+          },
+          "display_value": {
+            "type": "string",
+            "description": "Localized name of the feature (if available)."
+          },
+          "values": {
+            "type": "array",
+            "description": "Values of the feature.",
+            "items": {
+              "$ref": "#/components/schemas/ProductFeatureValue"
+            }
+          }
+        }
+      },
+      "ProductFeatureValue": {
+        "type": "object",
+        "description": "Representation of the value of a feature.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Value of the feature.",
+            "example": [
+              "AAA873001"
+            ]
+          },
+          "display_value": {
+            "type": "string",
+            "description": "Localized value of the feature (if available).",
+            "example": [
+              "Weight"
+            ]
+          }
+        }
+      },
+      "ProductAttachment": {
+        "type": "object",
+        "description": "Representation of an attachment.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "x-extensible-enum": [
+              "thumbnail",
+              "normal",
+              "detail",
+              "datasheet",
+              "safetysheet",
+              "link",
+              "other"
+            ],
+            "description": "Type of the attachment."
+          },
+          "href": {
+            "type": "string",
+            "description": "URL pointing to the attachment."
+          }
+        }
+      },
+      "ProductCondition": {
+        "type": "object",
+        "description": "Representation of a condition.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "Kind of the condition.",
+            "example": [
+              "new",
+              "used",
+              "refurbished"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "description": "Name of the condition."
+          }
+        }
+      },
+      "ProductReference": {
+        "type": "object",
+        "description": "Representation of a reference.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "Reference kind.",
+            "example": [
+              "followup",
+              "consists_of"
+            ]
+          },
+          "quantity": {
+            "type": "number",
+            "format": "float",
+            "description": "Reference quantity."
+          },
+          "catalog_label": {
+            "type": "string",
+            "description": "Label of the catalog containing the reference."
+          },
+          "supplier_pid": {
+            "type": "string",
+            "description": "Supplier product identifier of the reference."
+          }
+        }
+      },
+      "ProductSpecialTreatmentClass": {
+        "type": "object",
+        "description": "Representation of a special treatment class.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Class type."
+          },
+          "value": {
+            "type": "string",
+            "description": "Class value."
+          }
+        }
+      },
+      "ProductImage": {
+        "type": "object",
+        "description": "Representation of an image.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "x-extensible-enum": [
+              "thumbnail",
+              "normal",
+              "detail"
+            ],
+            "description": "Type of the attachment."
+          },
+          "href": {
+            "type": "string",
+            "description": "URL pointing to the image."
+          }
+        }
+      },
+      "ProductsBulkRequest": {
+        "type": "object",
+        "description": "Representation of a search request for products.",
+        "properties": {
+          "product_ids": {
+            "type": "array",
+            "description": "List of stable product identifiers.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProductsBulkResponse": {
+        "type": "object",
+        "description": "Representation of a search response for products.",
+        "properties": {
+          "_params": {
+            "$ref": "#/components/schemas/ProductsBulkRequest"
+          },
+          "items": {
+            "type": "array",
+            "description": "List of products found.",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "_total_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total count of products found."
+          }
+        }
+      },
+      "ReferenceProducts": {
+        "type": "object",
+        "description": "Representation of reference products.",
+        "properties": {
+          "_params": {
+            "$ref": "#/components/schemas/ReferenceProductsParams"
+          },
+          "items": {
+            "type": "array",
+            "description": "List of reference products found.",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceProduct"
+            }
+          },
+          "_total_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total count of reference products found."
+          }
+        }
+      },
+      "ReferenceProductsParams": {
+        "type": "object",
+        "description": "Representation of the search parameters for reference products.",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Value of input parameter 'limit'."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Value of input parameter 'offset'."
+          },
+          "sort": {
+            "type": "string",
+            "description": "Value of input parameter 'sort'."
+          },
+          "type": {
+            "type": "string",
+            "description": "Value of input parameter 'type'."
+          }
+        }
+      },
+      "ReferenceProduct": {
+        "type": "object",
+        "description": "Representation of a reference product.",
+        "properties": {
+          "reference_type": {
+            "type": "string",
+            "x-extensible-enum": [
+              "sparepart",
+              "similar",
+              "followup",
+              "mandatory",
+              "select",
+              "diff_orderunit",
+              "accessories",
+              "consists_of",
+              "others"
+            ],
+            "description": "Reference type."
+          },
+          "reference_quantity": {
+            "type": "number",
+            "format": "float",
+            "description": "Reference quentity."
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          }
+        }
+      },
+      "ReferenceProductsBulkRequest": {
+        "type": "object",
+        "description": "Representation of a search request for reference products.",
+        "properties": {
+          "product_ids": {
+            "type": "array",
+            "description": "List of stable product identifiers.",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ReferenceProductsBulkResponse": {
+        "type": "object",
+        "description": "Representation of a search response for reference products.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "List of reference products grouped by stable product identifier.",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceProductsBulkResponseEntry"
+            }
+          }
+        }
+      },
+      "ReferenceProductsBulkResponseEntry": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "description": "Stable product identifier."
+          },
+          "items": {
+            "type": "array",
+            "description": "List of reference products found.",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceProduct"
+            }
+          },
+          "_total_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total count of reference products found."
+          }
+        }
+      },
+      "SimilarProducts": {
+        "type": "object",
+        "description": "Representation of similar products.",
+        "properties": {
+          "_params": {
+            "$ref": "#/components/schemas/SimilarProductsParams"
+          },
+          "items": {
+            "type": "array",
+            "description": "List of similar products.",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "_total_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total count of similar products found."
+          }
+        }
+      },
+      "SimilarProductsParams": {
+        "type": "object",
+        "description": "Representation of the search parameters for similar procucts.",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Value of input parameter 'limit'."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Value of input parameter 'offset'."
+          }
+        }
+      },
+      "SimilarProductsBulkRequest": {
+        "type": "object",
+        "description": "Representation of a search request for similar products.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "List of items to search similar products for.",
+            "items": {
+              "$ref": "#/components/schemas/SimilarProductsBulkRequestEntry"
+            }
+          }
+        }
+      },
+      "SimilarProductsBulkRequestEntry": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "description": "Unique item identifier that is returned in the response."
+          },
+          "product_id": {
+            "type": "string",
+            "description": "Stable product identifiers. If this field is provided all following fields will be ignored."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name or rather short description of the item."
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description or rather long description of the item."
+          },
+          "categories": {
+            "type": "array",
+            "description": "Classification of the item.",
+            "items": {
+              "$ref": "#/components/schemas/ProductCategory"
+            }
+          }
+        },
+        "required": [
+          "item_id"
+        ]
+      },
+      "SimilarProductsBulkResponse": {
+        "type": "object",
+        "description": "Representation of a search response for similar products.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "List of similar products grouped by unique item identifier.",
+            "items": {
+              "$ref": "#/components/schemas/SimilarProductsBulkResponseEntry"
+            }
+          }
+        }
+      },
+      "SimilarProductsBulkResponseEntry": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "item_id": {
+                "type": "string",
+                "description": "Unique item identifier from the request."
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/SimilarProducts"
+          }
+        ]
+      },
+      "Optimizations": {
+        "type": "object",
+        "description": "Representation of optimizations.",
+        "properties": {
+          "_params": {
+            "$ref": "#/components/schemas/OptimizationsParams"
+          },
+          "items": {
+            "type": "array",
+            "description": "List of optimizations found.",
+            "items": {
+              "$ref": "#/components/schemas/Optimization"
+            }
+          },
+          "_total_count": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Total count of optimizations found."
+          }
+        }
+      },
+      "OptimizationsParams": {
+        "type": "object",
+        "description": "Representation of the search parameters for optimizations.",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "description": "Value of input parameter 'limit'."
+          },
+          "offset": {
+            "type": "integer",
+            "description": "Value of input parameter 'offset'."
+          }
+        }
+      },
+      "Optimization": {
+        "type": "object",
+        "description": "Representation of an optimization.",
+        "properties": {
+          "delivery_time": {
+            "$ref": "#/components/schemas/OptimizationDeliveryTimeInfo"
+          },
+          "price": {
+            "$ref": "#/components/schemas/OptimizationPriceInfo"
+          },
+          "display_price": {
+            "$ref": "#/components/schemas/OptimizationPriceInfo"
+          },
+          "product": {
+            "$ref": "#/components/schemas/Product"
+          }
+        }
+      },
+      "OptimizationDeliveryTimeInfo": {
+        "type": "object",
+        "description": "Representation of a relevant field for an optimization.",
+        "properties": {
+          "result": {
+            "type": "string",
+            "x-extensible-enum": [
+              "better",
+              "same",
+              "worse"
+            ],
+            "description": "The comparison result for the delivery time. The value can be either better, the same or worse in comparision to the original product."
+          },
+          "difference": {
+            "type": "number",
+            "format": "float",
+            "description": "The delivery time difference. The value is always positive."
+          }
+        }
+      },
+      "OptimizationPriceInfo": {
+        "type": "object",
+        "description": "Representation of a relevant field for an optimization.",
+        "properties": {
+          "result": {
+            "type": "string",
+            "x-extensible-enum": [
+              "better",
+              "same",
+              "worse"
+            ],
+            "description": "The comparison result for the price. The value can be either better, the same or worse in comparision to the original product."
+          },
+          "difference": {
+            "type": "number",
+            "format": "double",
+            "description": "The price difference. The value is always positive."
+          },
+          "currency": {
+            "type": "string",
+            "description": "The currency."
+          }
+        }
+      },
+      "OptimizationsBulkRequest": {
+        "type": "object",
+        "description": "Representation of a search request for optimizations.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "List of items to search optimizations for.",
+            "items": {
+              "$ref": "#/components/schemas/OptimizationsBulkRequestEntry"
+            }
+          }
+        }
+      },
+      "OptimizationsBulkRequestEntry": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "description": "Unique item identifier that is returned in the response."
+          },
+          "quantity": {
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "default": 1,
+            "description": "Quantity the optimizations should be based on."
+          },
+          "product_id": {
+            "type": "string",
+            "description": "Stable product identifiers. If this field is provided all following fields will be ignored."
+          },
+          "supplier_name": {
+            "type": "string",
+            "description": "Display name of the supplier."
+          },
+          "manufacturer_name": {
+            "type": "string",
+            "description": "Display name of the manufacturer."
+          },
+          "supplier_pid": {
+            "type": "string",
+            "description": "Product identifier of the supplier, e.g. supplier sku or item number."
+          },
+          "manufacturer_pid": {
+            "type": "string",
+            "description": "Product identifier of the manufacturer, e.g. manufacturers article number."
+          },
+          "gtin": {
+            "type": "string",
+            "description": "Global Trade Item Number."
+          },
+          "order_unit": {
+            "type": "string",
+            "description": "Order unit."
+          },
+          "packaging_unit": {
+            "type": "string",
+            "description": "Packaging unit."
+          },
+          "delivery_time": {
+            "type": "number",
+            "format": "float",
+            "description": "Delivery time in days."
+          },
+          "unit_price": {
+            "type": "number",
+            "format": "double",
+            "description": "Price for a single order unit."
+          },
+          "item_price": {
+            "type": "number",
+            "format": "double",
+            "description": "Price for one single item if a packaging unit and packaging quantity is given."
+          },
+          "currency": {
+            "type": "string",
+            "description": "Currency code"
+          }
+        },
+        "required": [
+          "item_id"
+        ]
+      },
+      "OptimizationsBulkResponse": {
+        "type": "object",
+        "description": "Representation of a search response for optimizations.",
+        "properties": {
+          "items": {
+            "type": "array",
+            "description": "List of optimizations grouped by unique item identifier.",
+            "items": {
+              "$ref": "#/components/schemas/OptimizationsBulkResponseEntry"
+            }
+          }
+        }
+      },
+      "OptimizationsBulkResponseEntry": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "item_id": {
+                "type": "string",
+                "description": "Unique item identifier from the request."
+              }
+            }
+          },
+          {
+            "$ref": "#/components/schemas/Optimizations"
+          }
+        ]
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://portal-dev.wescale.com/oauth2/authorize",
+            "tokenUrl": "https://api-dev.wescale.com/authentication/v1/oauth2/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}
